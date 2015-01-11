@@ -1,0 +1,27 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+// Particle's data
+struct Particle
+{
+	float3 position;
+	float3 velocity;
+};
+
+// Particle's data, shared with the shader
+RWStructuredBuffer<Particle> particleBuffer;
+
+// Variables set from the CPU
+float deltaTime;
+float2 mousePosition;
+
+[numthreads(256, 1, 1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+	float3 delta = float3(mousePosition.xy, 0) - particleBuffer[id.x].position;
+	float3 dir = normalize(delta);
+	float sqlength = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+
+	particleBuffer[id.x].velocity += 0.1f * sqlength * dir;
+	particleBuffer[id.x].position += particleBuffer[id.x].velocity * deltaTime;
+}
